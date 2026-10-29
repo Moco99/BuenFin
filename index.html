@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>frame · Buen Fin</title>
+<meta name="description" content="frame: tienda de práctica del AWS Student Builder Group ITVER. Los pagos son una simulación.">
+<meta name="theme-color" content="#f6f3ee">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6' fill='none' stroke='%23141414' stroke-width='2.2'/%3E%3Crect x='9' y='9' width='6' height='6' fill='%23e4572e'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg:#f6f3ee; --ink:#141414; --muted:#6f6a63; --line:#e4ded5; --card:#ffffff;
+    --accent:#e4572e; --accent-ink:#ffffff; --ok:#1d6b3a; --ok-bg:#e9f7ef; --mal:#8a1f11; --mal-bg:#fdecea;
+    --sombra:0 1px 2px rgba(20,20,20,.06), 0 10px 28px rgba(20,20,20,.08); --radio:14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0f0f10; --ink:#f2efe9; --muted:#a09a91; --line:#2a2a2d; --card:#19191b;
+      --accent:#ff7a4d; --accent-ink:#141414; --ok:#7fe0a4; --ok-bg:#12281b; --mal:#ffb4a8; --mal-bg:#331511;
+      --sombra:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.4);
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display:none !important; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  body.sin-scroll { overflow:hidden; }
+  a { color:inherit; }
+  :focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+
+  .saltar { position:absolute; left:-999px; top:8px; background:var(--ink); color:var(--bg); padding:8px 12px; border-radius:8px; z-index:100; }
+  .saltar:focus { left:8px; }
+  .anuncio { background:var(--ink); color:var(--bg); text-align:center; font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; padding:8px 16px; }
+
+  button { font:inherit; cursor:pointer; border:0; border-radius:999px; padding:10px 18px; background:var(--ink); color:var(--bg); transition:transform .15s, background .15s, color .15s, border-color .15s; }
+  button:hover:not(:disabled) { transform:translateY(-1px); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+
+  /* Cabecera */
+  .cabecera { position:sticky; top:0; z-index:30; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px clamp(16px,4vw,40px); background:var(--bg); background:color-mix(in srgb, var(--bg) 86%, transparent); -webkit-backdrop-filter:saturate(1.4) blur(12px); backdrop-filter:saturate(1.4) blur(12px); border-bottom:1px solid var(--line); }
+  .logo { display:inline-flex; align-items:center; gap:8px; color:var(--ink); text-decoration:none; font-weight:800; font-size:1.5rem; letter-spacing:-.045em; }
+  .logo svg { display:block; }
+  .acciones { display:flex; align-items:center; gap:14px; }
+  .sesion { display:flex; align-items:center; gap:12px; font-size:.9rem; flex-wrap:wrap; justify-content:flex-end; }
+  .sesion a { text-decoration:underline; text-underline-offset:3px; }
+  .sesion button { background:transparent; color:var(--ink); border:1px solid var(--line); padding:6px 12px; }
+  #saludo { max-width:22ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .btn-carrito { display:inline-flex; align-items:center; gap:8px; }
+  .contador { display:inline-grid; place-items:center; min-width:22px; height:22px; padding:0 6px; border-radius:999px; background:var(--accent); color:var(--accent-ink); font-size:.78rem; font-weight:700; }
+  .contador.pulso { animation:pulso .35s; }
+  @keyframes pulso { 50% { transform:scale(1.35); } }
+  #claims { max-width:1240px; margin:12px auto 0; padding:12px 16px; background:#1b1713; color:#f7efe6; border-radius:10px; font-size:.8rem; overflow:auto; white-space:pre-wrap; word-break:break-all; }
+  #error { display:none; max-width:1240px; margin:16px auto 0; background:var(--mal-bg); color:var(--mal); border:1px solid color-mix(in srgb, var(--mal) 30%, transparent); border-radius:10px; padding:10px 14px; }
+
+  /* Portada */
+  .hero { display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center; max-width:1240px; margin:0 auto; padding:clamp(32px,7vw,88px) clamp(16px,4vw,40px); }
+  .eyebrow { font-size:.76rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin:0 0 14px; }
+  .hero h1 { margin:0; font-size:clamp(2.7rem,7.6vw,5.8rem); line-height:.95; letter-spacing:-.05em; font-weight:800; }
+  .hero h1 em { font-style:normal; color:var(--accent); }
+  .hero .sub { max-width:46ch; color:var(--muted); font-size:1.08rem; margin:22px 0 30px; }
+  .cta { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .btn-principal { display:inline-block; background:var(--ink); color:var(--bg); text-decoration:none; padding:13px 26px; border-radius:999px; font-weight:600; transition:transform .15s; }
+  .btn-principal:hover { transform:translateY(-1px); }
+  .enlace-suave { color:var(--muted); text-underline-offset:4px; }
+  .marcos { position:relative; aspect-ratio:1/1; width:100%; max-width:430px; justify-self:center; }
+  .marcos span { position:absolute; border:2px solid var(--ink); border-radius:6px; }
+  .marcos span:nth-child(1) { inset:0; }
+  .marcos span:nth-child(2) { inset:12%; transform:rotate(-3deg); border-color:var(--muted); }
+  .marcos span:nth-child(3) { inset:26%; transform:rotate(2.5deg); border-color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent); }
+  .marcos b { position:absolute; left:6%; bottom:5%; font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; font-weight:600; }
+  @media (max-width: 860px) { .hero { grid-template-columns:1fr; } .marcos { display:none; } }
+
+  /* Catálogo */
+  .contenido { max-width:1240px; margin:0 auto; padding:0 clamp(16px,4vw,40px) 72px; }
+  .barra-catalogo { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
+  .barra-catalogo h2 { margin:0; font-size:1.9rem; letter-spacing:-.035em; }
+  #filtros { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { background:transparent; color:var(--ink); border:1px solid var(--line); padding:7px 14px; font-size:.9rem; }
+  .chip[aria-pressed="true"] { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  #catalogo { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:22px; }
+  @media (max-width: 520px) {
+    #catalogo { grid-template-columns:repeat(2, 1fr); gap:14px; }
+    .fila { flex-direction:column; align-items:stretch; gap:8px; }
+    .agregar { width:100%; }
+  }
+  .vacio-catalogo { grid-column:1/-1; color:var(--muted); }
+  .producto { background:var(--card); border:1px solid var(--line); border-radius:var(--radio); overflow:hidden; display:flex; flex-direction:column; transition:box-shadow .2s, transform .2s; }
+  .producto:hover { box-shadow:var(--sombra); transform:translateY(-3px); }
+  .foto { position:relative; aspect-ratio:4/5; overflow:hidden; background:#ece6dd; }
+  .foto img, .foto video { width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s; }
+  .producto:hover .foto img { transform:scale(1.05); }
+  .sin-imagen { position:absolute; inset:0; display:grid; place-items:center; font-size:3.2rem; font-weight:800; color:#8a8176; }
+  .etiqueta { position:absolute; left:12px; top:12px; background:var(--ink); color:var(--bg); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; padding:4px 10px; border-radius:999px; }
+  .info { padding:14px 14px 16px; display:flex; flex-direction:column; gap:4px; flex:1; }
+  .cat { font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  .producto h2 { margin:0; font-size:1.05rem; letter-spacing:-.01em; }
+  .desc { margin:2px 0 0; color:var(--muted); font-size:.88rem; }
+  .fila { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; padding-top:12px; }
+  .precio { font-weight:700; font-size:1.05rem; }
+  .agregar { background:transparent; color:var(--ink); border:1.5px solid var(--ink); padding:8px 16px; }
+  .agregar:hover:not(:disabled) { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .esqueleto { aspect-ratio:4/6; border-radius:var(--radio); border:1px solid var(--line); background:linear-gradient(100deg, var(--card) 30%, color-mix(in srgb, var(--line) 70%, var(--card)) 50%, var(--card) 70%); background-size:200% 100%; animation:brillo 1.2s infinite; }
+  @keyframes brillo { to { background-position:-200% 0; } }
+
+  /* Carrito lateral */
+  #velo { position:fixed; inset:0; z-index:40; background:rgba(10,10,10,.5); opacity:0; pointer-events:none; transition:opacity .25s; }
+  #velo.visible { opacity:1; pointer-events:auto; }
+  #carrito { position:fixed; top:0; right:0; bottom:0; z-index:50; width:min(420px, 100%); background:var(--card); border-left:1px solid var(--line); box-shadow:var(--sombra); display:flex; flex-direction:column; padding:20px; transform:translateX(100%); visibility:hidden; transition:transform .3s, visibility 0s .3s; }
+  #carrito.abierto { transform:none; visibility:visible; transition:transform .3s; }
+  .carrito-cab { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .carrito-cab h2 { margin:0; font-size:1.3rem; letter-spacing:-.03em; }
+  #cerrar-carrito { background:transparent; color:var(--ink); border:1px solid var(--line); padding:6px 12px; }
+  #lineas { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px; overflow:auto; flex:1; }
+  #lineas li { display:flex; align-items:center; gap:12px; }
+  .mini { width:56px; height:70px; object-fit:cover; border-radius:8px; background:#ece6dd; flex:none; }
+  .linea-info { flex:1; min-width:0; display:flex; flex-direction:column; }
+  .linea-nombre { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .linea-precio { color:var(--muted); font-size:.9rem; }
+  .cantidad { display:flex; align-items:center; gap:8px; }
+  .cantidad button { background:transparent; color:var(--ink); border:1px solid var(--line); padding:0; width:28px; height:28px; display:grid; place-items:center; line-height:1; }
+  .quitar { background:transparent !important; color:var(--muted) !important; padding:4px 6px !important; }
+  #vacio { color:var(--muted); margin:8px 0; }
+  .total { display:flex; justify-content:space-between; align-items:baseline; font-weight:700; font-size:1.15rem; margin:16px 0 12px; padding-top:14px; border-top:1px solid var(--line); }
+  #pagar { width:100%; padding:14px 18px; background:var(--accent); color:var(--accent-ink); font-weight:700; }
+  #aviso { color:var(--muted); font-size:.85rem; margin:10px 0 0; min-height:1.2em; }
+  #resultado { display:none; margin:10px 0 0; padding:10px 12px; border-radius:10px; font-size:.9rem; word-break:break-word; }
+  #resultado.ok { display:block; background:var(--ok-bg); color:var(--ok); }
+  #resultado.mal { display:block; background:var(--mal-bg); color:var(--mal); }
+  #ir-a-pago { display:inline-block; margin-top:8px; font-weight:600; }
+
+  #toast { position:fixed; left:50%; bottom:24px; z-index:60; transform:translate(-50%, 20px); background:var(--ink); color:var(--bg); padding:10px 18px; border-radius:999px; font-size:.92rem; opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; max-width:calc(100% - 32px); }
+  #toast.visible { opacity:1; transform:translate(-50%, 0); }
+
+  footer { border-top:1px solid var(--line); padding:28px clamp(16px,4vw,40px); color:var(--muted); font-size:.85rem; text-align:center; }
+  footer strong { color:var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior:auto; }
+    *, *::before, *::after { animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<a class="saltar" href="#catalogo">Saltar al catálogo</a>
+<div class="anuncio">Buen Fin · Colección de temporada · Proyecto de práctica: no se cobra nada</div>
+
+<header class="cabecera">
+  <a class="logo" href="index.html" aria-label="frame, inicio">
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/><rect x="9" y="9" width="6" height="6" fill="var(--accent)"/></svg>
+    frame
+  </a>
+  <div class="acciones">
+    <div class="sesion" id="sesion" hidden>
+      <a id="entrar" href="#">Iniciar sesión</a>
+      <span id="saludo" hidden></span>
+      <button id="datos" type="button" hidden>Ver mis datos</button>
+      <a id="salir" href="#" hidden>Cerrar sesión</a>
+    </div>
+    <button id="abrir-carrito" class="btn-carrito" type="button" aria-controls="carrito" aria-expanded="false">
+      Carrito <span id="cart-count" class="contador" aria-label="productos en el carrito">0</span>
+    </button>
+  </div>
+</header>
+<pre id="claims" hidden></pre>
+<div id="error" role="alert"></div>
+
+<section class="hero" aria-labelledby="titulo-hero">
+  <div>
+    <p class="eyebrow">Buen Fin · Temporada</p>
+    <h1 id="titulo-hero">Todo en su <em>lugar.</em></h1>
+    <p class="sub">Básicos bien hechos para armar tu look sin complicarte: playeras, chamarras, jeans y calzado.</p>
+    <div class="cta">
+      <a class="btn-principal" href="#catalogo">Ver colección</a>
+      <a class="enlace-suave" href="#pie">Cómo funciona esta tienda</a>
+    </div>
+  </div>
+  <div class="marcos" aria-hidden="true"><span></span><span></span><span></span><b>frame · 01</b></div>
+</section>
+
+<main class="contenido" id="contenido">
+  <div class="barra-catalogo">
+    <h2>Colección</h2>
+    <div id="filtros" role="group" aria-label="Categorías"></div>
+  </div>
+  <section id="catalogo" aria-label="Catálogo de productos" aria-busy="true"></section>
+</main>
+
+<div id="velo"></div>
+<aside id="carrito" role="dialog" aria-modal="true" aria-label="Carrito" aria-hidden="true">
+  <div class="carrito-cab">
+    <h2>Tu carrito</h2>
+    <button id="cerrar-carrito" type="button" aria-label="Cerrar carrito">Cerrar</button>
+  </div>
+  <ul id="lineas"></ul>
+  <p id="vacio">Aún no agregas nada.</p>
+  <div class="total"><span>Total</span><span id="total">$0.00</span></div>
+  <button id="pagar" type="button" disabled>Pagar</button>
+  <p id="aviso">El pago se activa en la sesión 3.</p>
+  <p id="resultado" role="status"></p>
+  <a id="ir-a-pago" href="#" hidden>Continuar al pago</a>
+</aside>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<footer id="pie">
+  <p><strong>frame</strong> es una tienda de práctica del AWS Student Builder Group ITVER. Los productos son de ejemplo y los pagos son una simulación: no se cobra ni se envía nada.</p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // Completa estos valores en las sesiones 2, 3 y 5. Si clientId queda vacío, la tienda funciona sin inicio de sesión.
+  var CONFIG = {
+    productosUrl: 'products.json',
+    cognitoDomain: '',   // Ejemplo: 'https://bf-ana-1.auth.us-east-1.amazoncognito.com' (con https:// y sin barra final)
+    clientId: '',        // ID del cliente de la app, de Cognito
+    redirectUri: '',     // Tu dirección de CloudFront con barra final. Si queda vacío se usa la de esta página.
+    apiUrl: '',          // Sesión 3: la Invoke URL de tu API, sin barra final. Ejemplo: 'https://abc123.execute-api.us-east-1.amazonaws.com'
+    pasarelaUrl: ''      // Sesión 5: 'pago.html'. Si queda vacío, la tienda solo muestra el número de pedido.
+  };
+
+  var K = { token: 'bf_id_token', verificador: 'bf_pkce_verificador', estado: 'bf_pkce_estado' };
+  var TODAS = 'Todas';
+
+  var moneda = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+  var productos = [];
+  var carrito = {}; // id -> cantidad
+  var categoriaActiva = TODAS;
+
+  var $catalogo = document.getElementById('catalogo');
+  var $lineas = document.getElementById('lineas');
+  var $vacio = document.getElementById('vacio');
+  var $total = document.getElementById('total');
+  var $error = document.getElementById('error');
+  var $carrito = document.getElementById('carrito');
+  var $velo = document.getElementById('velo');
+  var $abrir = document.getElementById('abrir-carrito');
+  var $cerrar = document.getElementById('cerrar-carrito');
+  var $contador = document.getElementById('cart-count');
+  var $toast = document.getElementById('toast');
+  var temporizadorToast = null;
+
+  function el(tag, props, children) {
+    var node = document.createElement(tag);
+    if (props) {
+      Object.keys(props).forEach(function (k) {
+        if (k === 'text') { node.textContent = props[k]; }
+        else if (k === 'onclick') { node.addEventListener('click', props[k]); }
+        else { node.setAttribute(k, props[k]); }
+      });
+    }
+    (children || []).forEach(function (c) { if (c) { node.appendChild(c); } });
+    return node;
+  }
+
+  function mostrarError(msg) {
+    $error.textContent = msg;
+    $error.style.display = 'block';
+  }
+
+  function mostrarToast(msg) {
+    $toast.textContent = msg;
+    $toast.classList.add('visible');
+    clearTimeout(temporizadorToast);
+    temporizadorToast = setTimeout(function () { $toast.classList.remove('visible'); }, 2200);
+  }
+
+  function porId(id) {
+    for (var i = 0; i < productos.length; i++) { if (productos[i].id === id) { return productos[i]; } }
+    return null;
+  }
+
+  // ---------- Carrito lateral ----------
+
+  function abrirCarrito() {
+    $carrito.classList.add('abierto');
+    $carrito.setAttribute('aria-hidden', 'false');
+    $velo.classList.add('visible');
+    $abrir.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('sin-scroll');
+    $cerrar.focus();
+  }
+
+  function cerrarCarrito() {
+    $carrito.classList.remove('abierto');
+    $carrito.setAttribute('aria-hidden', 'true');
+    $velo.classList.remove('visible');
+    $abrir.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('sin-scroll');
+    $abrir.focus();
+  }
+
+  function cambiar(id, delta) {
+    var antes = carrito[id] || 0;
+    var nueva = antes + delta;
+    if (nueva <= 0) { delete carrito[id]; } else if (nueva <= 10) { carrito[id] = nueva; }
+    pintarCarrito();
+    if (delta > 0 && (carrito[id] || 0) > antes) {
+      var p = porId(id);
+      mostrarToast('Agregado: ' + (p ? p.nombre : 'producto'));
+    }
+  }
+
+  // ---------- Catálogo ----------
+
+  function pintarEsqueleto() {
+    $catalogo.textContent = '';
+    for (var i = 0; i < 4; i++) { $catalogo.appendChild(el('div', { 'class': 'esqueleto', 'aria-hidden': 'true' })); }
+  }
+
+  function medioDe(p) {
+    if (p.video) {
+      return el('video', { src: p.video, poster: p.imagen, controls: '', preload: 'none', playsinline: '' });
+    }
+    var img = el('img', { src: p.imagen, alt: p.nombre, loading: 'lazy', decoding: 'async' });
+    // Si la imagen no existe todavía, mostramos la inicial del producto en lugar de un cuadro roto.
+    img.addEventListener('error', function () {
+      if (img.parentNode) {
+        img.parentNode.replaceChild(el('div', { 'class': 'sin-imagen', text: String(p.nombre || '?').charAt(0).toUpperCase() }), img);
+      }
+    });
+    return img;
+  }
+
+  function pintarFiltros() {
+    var $f = document.getElementById('filtros');
+    $f.textContent = '';
+    var cats = [];
+    productos.forEach(function (p) { if (p.categoria && cats.indexOf(p.categoria) === -1) { cats.push(p.categoria); } });
+    if (cats.length < 2) { return; }
+    [TODAS].concat(cats).forEach(function (c) {
+      $f.appendChild(el('button', {
+        type: 'button', 'class': 'chip', text: c, 'aria-pressed': String(c === categoriaActiva),
+        onclick: function () { categoriaActiva = c; pintarFiltros(); pintarCatalogo(); }
+      }));
+    });
+  }
+
+  function pintarCatalogo() {
+    $catalogo.textContent = '';
+    var lista = productos.filter(function (p) { return categoriaActiva === TODAS || p.categoria === categoriaActiva; });
+    if (!lista.length) {
+      $catalogo.appendChild(el('p', { 'class': 'vacio-catalogo', text: 'No hay productos en esta categoría.' }));
+    }
+    lista.forEach(function (p) {
+      var foto = el('div', { 'class': 'foto' }, [medioDe(p), p.etiqueta ? el('span', { 'class': 'etiqueta', text: p.etiqueta }) : null]);
+      var info = el('div', { 'class': 'info' }, [
+        p.categoria ? el('span', { 'class': 'cat', text: p.categoria }) : null,
+        el('h2', { text: p.nombre }),
+        p.descripcion ? el('p', { 'class': 'desc', text: p.descripcion }) : null,
+        el('div', { 'class': 'fila' }, [
+          el('span', { 'class': 'precio', text: moneda.format(p.precio) }),
+          el('button', { type: 'button', 'class': 'agregar', text: 'Agregar', onclick: function () { cambiar(p.id, 1); } })
+        ])
+      ]);
+      $catalogo.appendChild(el('article', { 'class': 'producto' }, [foto, info]));
+    });
+    $catalogo.setAttribute('aria-busy', 'false');
+  }
+
+  function actualizarContador() {
+    var n = 0;
+    Object.keys(carrito).forEach(function (id) { n += carrito[id]; });
+    if (String(n) !== $contador.textContent) {
+      $contador.textContent = String(n);
+      $contador.classList.remove('pulso');
+      void $contador.offsetWidth;
+      $contador.classList.add('pulso');
+    }
+  }
+
+  function pintarCarrito() {
+    $lineas.textContent = '';
+    var total = 0;
+    var ids = Object.keys(carrito);
+    ids.forEach(function (id) {
+      var p = porId(id);
+      if (!p) { return; }
+      var cant = carrito[id];
+      total += p.precio * cant;
+      var mini = el('img', { 'class': 'mini', src: p.imagen, alt: '' });
+      mini.addEventListener('error', function () { mini.style.visibility = 'hidden'; });
+      var controles = el('span', { 'class': 'cantidad' }, [
+        el('button', { type: 'button', text: '−', 'aria-label': 'Quitar uno', onclick: function () { cambiar(id, -1); } }),
+        el('span', { text: String(cant) }),
+        el('button', { type: 'button', text: '+', 'aria-label': 'Agregar uno', onclick: function () { cambiar(id, 1); } })
+      ]);
+      var quitar = el('button', { type: 'button', 'class': 'quitar', text: '✕', 'aria-label': 'Quitar del carrito',
+        onclick: function () { delete carrito[id]; pintarCarrito(); } });
+      $lineas.appendChild(el('li', null, [
+        mini,
+        el('div', { 'class': 'linea-info' }, [
+          el('span', { 'class': 'linea-nombre', text: p.nombre }),
+          el('span', { 'class': 'linea-precio', text: moneda.format(p.precio * cant) })
+        ]),
+        controles,
+        quitar
+      ]));
+    });
+    $vacio.style.display = ids.length ? 'none' : 'block';
+    $total.textContent = moneda.format(total);
+    actualizarContador();
+    actualizarPagar();
+  }
+
+
+  // ---------- Pago: manda el pedido a la API ----------
+
+  function mostrarResultado(msg, tipo) {
+    var $r = document.getElementById('resultado');
+    $r.textContent = msg;
+    $r.className = tipo;
+    document.getElementById('ir-a-pago').hidden = true;
+  }
+
+  function actualizarPagar() {
+    var $p = document.getElementById('pagar');
+    var $a = document.getElementById('aviso');
+    if (!CONFIG.apiUrl) { $p.disabled = true; $a.textContent = 'El pago se activa en la sesión 3.'; return; }
+    if (!claimsVigentes()) { $p.disabled = true; $a.textContent = 'Inicia sesión para pagar.'; return; }
+    if (!Object.keys(carrito).length) { $p.disabled = true; $a.textContent = 'Agrega productos para pagar.'; return; }
+    $p.disabled = false;
+    $a.textContent = '';
+  }
+
+  function pagar() {
+    var token = sessionStorage.getItem(K.token);
+    var items = Object.keys(carrito).map(function (id) { return { id: id, cantidad: carrito[id] }; });
+    document.getElementById('pagar').disabled = true;
+    mostrarResultado('Enviando tu pedido…', 'ok');
+
+    fetch(CONFIG.apiUrl + '/pedidos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ items: items })
+    })
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (datos) { return { estado: r.status, datos: datos }; });
+      })
+      .then(function (res) {
+        if (res.estado === 202) {
+          carrito = {};
+          pintarCarrito();
+          mostrarResultado('Pedido recibido: ' + res.datos.pedidoId + '. Total ' + moneda.format(res.datos.total) + '.', 'ok');
+          if (CONFIG.pasarelaUrl) {
+            var $ir = document.getElementById('ir-a-pago');
+            $ir.setAttribute('href', CONFIG.pasarelaUrl + '?pedido=' + encodeURIComponent(res.datos.pedidoId) +
+              '&total=' + encodeURIComponent(res.datos.total));
+            $ir.hidden = false;
+            $ir.click();
+          }
+        } else if (res.estado === 401) {
+          sessionStorage.removeItem(K.token);
+          mostrarResultado('Tu sesión caducó o no es válida. Inicia sesión de nuevo.', 'mal');
+          if (CONFIG.clientId && CONFIG.cognitoDomain) { pintarSesion(); }
+        } else if (res.estado === 400) {
+          mostrarResultado(res.datos.error || 'El pedido no es válido.', 'mal');
+        } else {
+          mostrarResultado('No pudimos registrar tu pedido (código ' + res.estado + ').', 'mal');
+        }
+      })
+      .catch(function () {
+        mostrarResultado('No se pudo conectar con la tienda. Revisa la dirección de la API y el CORS.', 'mal');
+      })
+      .then(actualizarPagar);
+  }
+
+  function cargarCatalogo() {
+    pintarEsqueleto();
+    fetch(CONFIG.productosUrl)
+      .then(function (r) {
+        if (!r.ok) { throw new Error('HTTP ' + r.status); }
+        return r.json();
+      })
+      .then(function (datos) {
+        productos = datos.productos || [];
+        pintarFiltros();
+        pintarCatalogo();
+        pintarCarrito();
+      })
+      .catch(function (e) {
+        $catalogo.textContent = '';
+        $catalogo.setAttribute('aria-busy', 'false');
+        mostrarError('No se pudo cargar el catálogo (' + e.message + ').');
+      });
+  }
+
+
+  // ---------- Inicio de sesión con Cognito (código de autorización con PKCE) ----------
+
+  function redirectUri() {
+    return CONFIG.redirectUri || (window.location.origin + '/');
+  }
+
+  function base64url(bytes) {
+    var s = '';
+    for (var i = 0; i < bytes.length; i++) { s += String.fromCharCode(bytes[i]); }
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function aleatorio() {
+    var b = new Uint8Array(32);
+    window.crypto.getRandomValues(b);
+    return base64url(b);
+  }
+
+  function sha256(texto) {
+    return window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto))
+      .then(function (h) { return base64url(new Uint8Array(h)); });
+  }
+
+  function leerClaims(token) {
+    try {
+      var parte = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (parte.length % 4) { parte += '='; }
+      var bin = atob(parte);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) { bytes[i] = bin.charCodeAt(i); }
+      return JSON.parse(new TextDecoder().decode(bytes));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function claimsVigentes() {
+    var token = sessionStorage.getItem(K.token);
+    if (!token) { return null; }
+    var c = leerClaims(token);
+    if (!c || !c.exp || c.exp * 1000 <= Date.now()) {
+      sessionStorage.removeItem(K.token);
+      return null;
+    }
+    return c;
+  }
+
+  function prepararEntrada() {
+    // Genera el verificador y el desafío PKCE y deja listo el enlace de "Iniciar sesión".
+    var verificador = aleatorio();
+    var estado = aleatorio();
+    sessionStorage.setItem(K.verificador, verificador);
+    sessionStorage.setItem(K.estado, estado);
+    return sha256(verificador).then(function (desafio) {
+      var q = [
+        'response_type=code',
+        'client_id=' + encodeURIComponent(CONFIG.clientId),
+        'redirect_uri=' + encodeURIComponent(redirectUri()),
+        'scope=' + encodeURIComponent('openid email'),
+        'state=' + encodeURIComponent(estado),
+        'code_challenge=' + encodeURIComponent(desafio),
+        'code_challenge_method=S256'
+      ].join('&');
+      document.getElementById('entrar').setAttribute('href', CONFIG.cognitoDomain + '/oauth2/authorize?' + q);
+    });
+  }
+
+  function pintarSesion() {
+    var c = claimsVigentes();
+    var $entrar = document.getElementById('entrar');
+    var $saludo = document.getElementById('saludo');
+    var $datos = document.getElementById('datos');
+    var $salir = document.getElementById('salir');
+    var $claims = document.getElementById('claims');
+    if (c) {
+      $saludo.textContent = 'Hola, ' + (c.email || 'cliente');
+      $saludo.hidden = false; $datos.hidden = false; $salir.hidden = false; $entrar.hidden = true;
+      $salir.setAttribute('href', CONFIG.cognitoDomain + '/logout?client_id=' + encodeURIComponent(CONFIG.clientId) +
+        '&logout_uri=' + encodeURIComponent(redirectUri()));
+      var mostrar = {
+        email: c.email, sub: c.sub, emisor: c.iss, aplicacion: c.aud, tipo_de_token: c.token_use,
+        caduca: new Date(c.exp * 1000).toISOString()
+      };
+      $claims.textContent = JSON.stringify(mostrar, null, 2);
+    } else {
+      $saludo.hidden = true; $datos.hidden = true; $salir.hidden = true; $entrar.hidden = false; $claims.hidden = true;
+      return prepararEntrada();
+    }
+    return Promise.resolve();
+  }
+
+  function intercambiarCodigo(codigo) {
+    var cuerpo = [
+      'grant_type=authorization_code',
+      'client_id=' + encodeURIComponent(CONFIG.clientId),
+      'code=' + encodeURIComponent(codigo),
+      'redirect_uri=' + encodeURIComponent(redirectUri()),
+      'code_verifier=' + encodeURIComponent(sessionStorage.getItem(K.verificador) || '')
+    ].join('&');
+    return fetch(CONFIG.cognitoDomain + '/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: cuerpo
+    }).then(function (r) {
+      if (!r.ok) { throw new Error('Cognito respondió ' + r.status); }
+      return r.json();
+    }).then(function (t) {
+      if (!t.id_token) { throw new Error('La respuesta no trae id_token'); }
+      sessionStorage.setItem(K.token, t.id_token);
+    });
+  }
+
+  function iniciarSesion() {
+    if (!CONFIG.clientId || !CONFIG.cognitoDomain) { return Promise.resolve(); }
+    document.getElementById('sesion').hidden = false;
+
+    document.getElementById('datos').addEventListener('click', function () {
+      var $c = document.getElementById('claims');
+      $c.hidden = !$c.hidden;
+    });
+    document.getElementById('salir').addEventListener('click', function () {
+      sessionStorage.removeItem(K.token);
+    });
+
+    var params = new URLSearchParams(window.location.search);
+    var codigo = params.get('code');
+    var estado = params.get('state');
+    var errorCognito = params.get('error');
+
+    if (errorCognito) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      mostrarError('Cognito devolvió un error: ' + errorCognito + '.');
+      return pintarSesion();
+    }
+    if (codigo) {
+      var esperado = sessionStorage.getItem(K.estado);
+      window.history.replaceState({}, document.title, window.location.pathname);
+      if (!estado || estado !== esperado) {
+        mostrarError('No se pudo iniciar sesión: el estado no coincide. Intenta de nuevo.');
+        return pintarSesion();
+      }
+      return intercambiarCodigo(codigo)
+        .catch(function (e) { mostrarError('No se pudo iniciar sesión (' + e.message + ').'); })
+        .then(pintarSesion);
+    }
+    return pintarSesion();
+  }
+
+  $abrir.addEventListener('click', abrirCarrito);
+  $cerrar.addEventListener('click', cerrarCarrito);
+  $velo.addEventListener('click', cerrarCarrito);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && $carrito.classList.contains('abierto')) { cerrarCarrito(); }
+  });
+  document.getElementById('pagar').addEventListener('click', pagar);
+  pintarCarrito();
+  cargarCatalogo();
+  iniciarSesion().then(actualizarPagar);
+})();
+</script>
+</body>
+</html>

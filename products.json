@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "moneda": "MXN",
+  "productos": [
+    {
+      "id": "playera-basica",
+      "nombre": "Playera básica",
+      "precio": 199,
+      "categoria": "Playeras",
+      "etiqueta": "Nuevo",
+      "descripcion": "Algodón suave y corte recto. La básica que combina con todo.",
+      "imagen": "imgs/playera.png",
+      "video": "videos/playera.mp4"
+    },
+    {
+      "id": "chamarra-mezclilla",
+      "nombre": "Chamarra de mezclilla",
+      "precio": 899,
+      "categoria": "Chamarras",
+      "etiqueta": "Más vendida",
+      "descripcion": "Mezclilla estructurada con bolsas al frente y cierre completo.",
+      "imagen": "imgs/chamarra.png",
+      "video": "videos/chamarra.mp4"
+    },
+    {
+      "id": "jeans-clasicos",
+      "nombre": "Jeans clásicos",
+      "precio": 549,
+      "categoria": "Pantalones",
+      "etiqueta": "",
+      "descripcion": "Corte recto y tiro medio, con el lavado de siempre.",
+      "imagen": "imgs/jeans.png",
+      "video": "videos/jeans.mp4"
+    },
+    {
+      "id": "tenis-urbanos",
+      "nombre": "Tenis urbanos",
+      "precio": 799,
+      "categoria": "Calzado",
+      "etiqueta": "Nuevo",
+      "descripcion": "Suela ligera y plantilla acolchada para andar todo el día.",
+      "imagen": "imgs/tenis.png",
+      "video": "videos/tenis.mp4"
+    }
+  ]
+}
